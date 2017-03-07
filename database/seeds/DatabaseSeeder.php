@@ -8,6 +8,7 @@ class DatabaseSeeder extends Seeder
     {
         DB::transaction(function () {
             $this->call(UnitsTableSeeder::class);
+            $this->call(CostTypesTableSeeder::class);
         });
     }
 }
