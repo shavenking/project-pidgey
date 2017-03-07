@@ -25,4 +25,11 @@ class WorkController extends Controller
 
         return response()->json(['data' => $work], 201);
     }
+
+    public function delete(Work $work)
+    {
+        $work->delete();
+
+        return response()->json([], 204);
+    }
 }

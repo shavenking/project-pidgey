@@ -58,4 +58,14 @@ class WorkTest extends TestCase
         $this->assertArrayHasKey('main_title', $response['data']['engineering_type']);
         $this->assertArrayHasKey('detailing_title', $response['data']['engineering_type']);
     }
+
+    public function testDelete()
+    {
+        $work = factory(Work::class)->create();
+
+        $this->json('DELETE', "/api/v1/works/{$work->id}")
+            ->assertStatus(204);
+
+        $this->assertDatabaseMissing((new Work)->getTable(), ['id' => $work->id]);
+    }
 }
