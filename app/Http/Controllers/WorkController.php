@@ -13,4 +13,16 @@ class WorkController extends Controller
             'data' => $work->with('engineeringType')->get()
         ]);
     }
+
+    public function create(Request $request, Work $work)
+    {
+        $work = $work->create([
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'unit_price' => 0,
+            'engineering_type_id' => $request->engineering_type_id
+        ])->load('engineeringType');
+
+        return response()->json(['data' => $work], 201);
+    }
 }
