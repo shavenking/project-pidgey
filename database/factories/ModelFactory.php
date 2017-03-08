@@ -33,3 +33,15 @@ $factory->define(App\Work::class, function (Faker\Generator $faker) {
         }
     ];
 });
+
+$factory->define(App\WorkItem::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->word,
+        'unit_id' => function () {
+            return App\Unit::first()->id;
+        },
+        'cost_type_id' => function () {
+            return App\CostType::first()->id;
+        }
+    ];
+});

@@ -8,6 +8,11 @@ class Work extends Model
 {
     protected $fillable = ['name', 'amount', 'unit_price', 'engineering_type_id'];
 
+    public function workItems()
+    {
+        return $this->belongsToMany(WorkItem::class)->withPivot('amount', 'unit_price')->withTimestamps();
+    }
+
     public function engineeringType()
     {
         return $this->belongsTo(EngineeringType::class);
