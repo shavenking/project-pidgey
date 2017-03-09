@@ -19,6 +19,25 @@ class WorkItemController extends Controller
         return response()->json(['data' => $workItems]);
     }
 
+    public function stats(Work $work)
+    {
+        $workItems = $work->workItems()->with('costType')->get();
+
+        $stats = $workItems->groupBy('cost_type_id')->map(function ($workItems) {
+            return [
+                'cost_type_id' => $workItems->first()->costType->id,
+                'cost_type_name' => $workItems->first()->costType->name,
+                'sum' => $workItems->map(function ($workItem) {
+                    return bcmul($workItem->pivot->amount, $workItem->pivot->unit_price, 2);
+                })->reduce(function ($carry, $unitPrice) {
+                    return bcadd($carry, $unitPrice, 2);
+                }, '0')
+            ];
+        });
+
+        return response()->json(['data' => $stats->values()]);
+    }
+
     public function create(Request $request, Work $work, WorkItem $workItem)
     {
         if ($request->has('work_item_id') && $request->has('name', 'unit_price', 'cost_type_id')) {

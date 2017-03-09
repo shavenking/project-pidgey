@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\{
+    CostType,
     Work,
     WorkItem
 };
@@ -90,6 +91,46 @@ class WorkItemTest extends TestCase
             'work_id' => $work->id,
             'work_item_id' => $workItem->id
         ]);
+    }
+
+    public function testGetStatsByCostType()
+    {
+        $costTypes = factory(CostType::class, 2)->create();
+
+        $dataSet = [
+            [
+                'work_item' => factory(WorkItem::class)->create(['cost_type_id' => $costTypes[0]->id]),
+                'amount' => '11.11',
+                'unit_price' => '0.11'
+            ],
+            [
+                'work_item' => factory(WorkItem::class)->create(['cost_type_id' => $costTypes[0]->id]),
+                'amount' => '94.87',
+                'unit_price' => '0.11'
+            ],
+            [
+                'work_item' => factory(WorkItem::class)->create(['cost_type_id' => $costTypes[1]->id]),
+                'amount' => '12.34',
+                'unit_price' => '0.22'
+            ]
+        ];
+
+        $work = factory(Work::class)->create();
+        foreach ($dataSet as $data) {
+            $work->workItems()->attach(
+                $data['work_item'],
+                array_only($data, ['amount', 'unit_price'])
+            );
+        }
+
+        $response = $this->json('GET', "/api/v1/works/{$work->id}/work-items/stats")
+            ->assertStatus(200)
+            ->assertExactJson([
+                'data' => [
+                    ['cost_type_id' => $costTypes[0]->id, 'cost_type_name' => $costTypes[0]->name, 'sum' => '11.65'],
+                    ['cost_type_id' => $costTypes[1]->id, 'cost_type_name' => $costTypes[1]->name, 'sum' => '2.71']
+                ]
+            ]);
     }
 
     private function assertWorkItemAttributes(array $workItem)

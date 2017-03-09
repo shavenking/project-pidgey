@@ -23,6 +23,12 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     ];
 });
 
+$factory->define(App\CostType::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->text(10)
+    ];
+});
+
 $factory->define(App\Work::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->word,
