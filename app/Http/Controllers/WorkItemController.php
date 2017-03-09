@@ -51,6 +51,13 @@ class WorkItemController extends Controller
         return response()->json(['data' => $this->transformWorkItem($workItem)], 201);
     }
 
+    public function delete(Work $work, WorkItem $workItem)
+    {
+        $work->workItems()->detach($workItem);
+
+        return response()->json([], 204);
+    }
+
     private function transformWorkItem(WorkItem $workItem)
     {
         $workItem->load('unit', 'costType');

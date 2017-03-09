@@ -77,6 +77,21 @@ class WorkItemTest extends TestCase
         ]);
     }
 
+    public function testDelete()
+    {
+        $work = factory(Work::class)->create();
+        $workItem = factory(WorkItem::class)->create();
+        $work->workItems()->attach($workItem, ['amount' => '0', 'unit_price' => '0']);
+
+        $this->json('DELETE', "/api/v1/works/{$work->id}/work-items/{$workItem->id}")
+            ->assertStatus(204);
+
+        $this->assertDatabaseMissing($work->workItems()->getTable(), [
+            'work_id' => $work->id,
+            'work_item_id' => $workItem->id
+        ]);
+    }
+
     private function assertWorkItemAttributes(array $workItem)
     {
         $this->assertArrayHasKey('id', $workItem);

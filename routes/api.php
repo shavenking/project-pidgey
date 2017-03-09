@@ -15,4 +15,5 @@ Route::group(['prefix' => '/v1/works'], function () {
 Route::group(['prefix' => '/v1/works/{work}/work-items'], function () {
     Route::get('/', 'WorkItemController@list');
     Route::post('/', 'WorkItemController@create');
+    Route::delete('/{workItem}', 'WorkItemController@delete');
 });
