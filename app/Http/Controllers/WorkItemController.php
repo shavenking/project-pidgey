@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 
 class WorkItemController extends Controller
 {
+    private $workItemReturnKeys = ['id', 'name', 'unit_id', 'unit_name', 'cost_type_id', 'cost_type_name'];
+
     public function listWithoutWork()
     {
         $workItems = WorkItem::with('unit', 'costType')->get()->map(function (WorkItem $workItem) {
@@ -18,11 +20,25 @@ class WorkItemController extends Controller
                     ->setAttribute('unit_name', $workItem->unit->name)
                     ->setAttribute('cost_type_name', $workItem->costType->name)
                     ->toArray(),
-                ['id', 'name', 'unit_id', 'unit_name', 'cost_type_id', 'cost_type_name']
+                $this->workItemReturnKeys
             );
         });
 
         return response()->json(['data' => $workItems]);
+    }
+
+    public function createWithoutWork(Request $request)
+    {
+        $workItem = WorkItem::create([
+            'name' => $request->name,
+            'unit_id' => $request->unit_id,
+            'cost_type_id' => $request->cost_type_id
+        ])->load('unit', 'costType');
+
+        $workItem->setAttribute('unit_name', $workItem->unit->name)
+            ->setAttribute('cost_type_name', $workItem->costType->name);
+
+        return response()->json(['data' => array_only($workItem->toArray(), $this->workItemReturnKeys)], 201);
     }
 
     public function list(Work $work)

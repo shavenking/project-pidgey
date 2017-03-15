@@ -14,6 +14,7 @@ Route::group(['prefix' => '/v1/works'], function () {
 // WorkItem
 Route::group(['prefix' => '/v1/work-items'], function () {
     Route::get('/', 'WorkItemController@listWithoutWork');
+    Route::post('/', 'WorkItemController@createWithoutWork');
 });
 
 Route::group(['prefix' => '/v1/works/{work}/work-items'], function () {

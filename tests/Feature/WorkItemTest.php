@@ -32,6 +32,32 @@ class WorkItemTest extends TestCase
         }
     }
 
+    public function testCreate()
+    {
+        $workItem = factory(WorkItem::class)->make();
+
+        $response = $this->json('POST', '/api/v1/work-items', [
+            'name' => $workItem->name,
+            'unit_id' => $workItem->unit_id,
+            'cost_type_id' => $workItem->cost_type_id
+        ])->assertStatus(201);
+
+        $workItem = WorkItem::where(['name' => $workItem->name, 'unit_id' => $workItem->unit_id])
+            ->with('unit', 'costType')
+            ->first();
+
+        $response->assertExactJson([
+            'data' => [
+                'id' => $workItem->id,
+                'name' => $workItem->name,
+                'unit_id' => $workItem->unit_id,
+                'unit_name' => $workItem->unit->name,
+                'cost_type_id' => $workItem->cost_type_id,
+                'cost_type_name' => $workItem->costType->name
+            ]
+        ]);
+    }
+
     public function testGetListWithoutWork()
     {
         $workItems = factory(WorkItem::class, 2)->create()->map(function (WorkItem $workItem) {
