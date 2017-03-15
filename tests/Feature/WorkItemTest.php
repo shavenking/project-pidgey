@@ -32,6 +32,25 @@ class WorkItemTest extends TestCase
         }
     }
 
+    public function testGetListWithoutWork()
+    {
+        $workItems = factory(WorkItem::class, 2)->create()->map(function (WorkItem $workItem) {
+            return array_only(
+                $workItem
+                    ->setAttribute('unit_name', $workItem->unit->name)
+                    ->setAttribute('cost_type_name', $workItem->costType->name)
+                    ->toArray(),
+                ['id', 'name', 'unit_id', 'unit_name', 'cost_type_id', 'cost_type_name']
+            );
+        });
+
+        $response = $this->json('GET', '/api/v1/work-items')
+            ->assertStatus(200)
+            ->assertExactJson([
+                'data' => $workItems->toArray()
+            ]);
+    }
+
     public function testAddNewWorkItemToWork()
     {
         $work = factory(Work::class)->create();
