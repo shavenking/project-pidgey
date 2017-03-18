@@ -43,8 +43,8 @@ class WorkItemController extends Controller
 
     public function list(Work $work)
     {
-        $workItems = $work->workItems()->with('unit', 'costType')->get()->map(function (WorkItem $workItem) {
-            return $this->transformWorkItem($workItem);
+        $workItems = $work->workItems()->with('unit', 'costType')->get()->map(function (WorkItem $workItem) use ($work) {
+            return $this->transformWorkItem($work, $workItem);
         });
 
         return response()->json(['data' => $workItems]);
@@ -71,10 +71,6 @@ class WorkItemController extends Controller
 
     public function create(Request $request, Work $work, WorkItem $workItem)
     {
-        if ($request->has('work_item_id') && $request->has('name', 'unit_price', 'cost_type_id')) {
-            return response()->json([], 403);
-        }
-
         if ($request->has('work_item_id')) {
             $workItem = $workItem->find($request->work_item_id);
         } else {
@@ -98,7 +94,7 @@ class WorkItemController extends Controller
 
         \DB::commit();
 
-        return response()->json(['data' => $this->transformWorkItem($workItem)], 201);
+        return response()->json(['data' => $this->transformWorkItem($work, $workItem)], 201);
     }
 
     public function delete(Work $work, WorkItem $workItem)
@@ -108,13 +104,13 @@ class WorkItemController extends Controller
         return response()->json([], 204);
     }
 
-    private function transformWorkItem(WorkItem $workItem)
+    private function transformWorkItem(Work $work, WorkItem $workItem)
     {
-        $workItem->load('unit', 'costType');
+        $workItem = $work->workItems()->with('unit', 'costType')->find($workItem->id);
 
-        $workItem->setAttribute('work_id', $workItem->pivot_work_id);
-        $workItem->setAttribute('amount', $workItem->pivot_amount);
-        $workItem->setAttribute('unit_price', $workItem->pivot_unit_price);
+        $workItem->setAttribute('work_id', $workItem->pivot->work_id);
+        $workItem->setAttribute('amount', $workItem->pivot->amount);
+        $workItem->setAttribute('unit_price', $workItem->pivot->unit_price);
         $workItem->setAttribute('unit_name', $workItem->unit->name);
         $workItem->setAttribute('cost_type_name', $workItem->costType->name);
 
