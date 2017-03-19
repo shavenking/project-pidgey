@@ -28,6 +28,7 @@ class WorkController extends Controller
 
     public function delete(Work $work)
     {
+        $work->workItems()->detach();
         $work->delete();
 
         return response()->json([], 204);

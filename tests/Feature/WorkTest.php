@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Work;
+use App\{
+    Work,
+    WorkItem
+};
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -62,10 +65,21 @@ class WorkTest extends TestCase
     public function testDelete()
     {
         $work = factory(Work::class)->create();
+        $workItem = factory(WorkItem::class)->create();
+        $work->workItems()->attach($workItem, ['amount' => '1', 'unit_price' => '2']);
+
+        $this->assertDatabaseHas($work->workItems()->getTable(), [
+            'work_id' => $work->id,
+            'work_item_id' => $workItem->id
+        ]);
 
         $this->json('DELETE', "/api/v1/works/{$work->id}")
             ->assertStatus(204);
 
-        $this->assertDatabaseMissing((new Work)->getTable(), ['id' => $work->id]);
+        $this->assertDatabaseMissing($work->getTable(), ['id' => $work->id]);
+        $this->assertDatabaseMissing($work->workItems()->getTable(), [
+            'work_id' => $work->id,
+            'work_item_id' => $workItem->id
+        ]);
     }
 }
