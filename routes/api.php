@@ -1,5 +1,9 @@
 <?php
 
+// Authentication
+Route::post('/v1/users', 'AuthenticationController@createUser');
+Route::post('/v1/tokens', 'AuthenticationController@createToken');
+
 Route::get('/v1/units', 'UnitController@list');
 Route::get('/v1/cost-types', 'CostTypeController@list');
 Route::get('/v1/engineering-types', 'EngineeringTypeController@list');
