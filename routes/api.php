@@ -1,5 +1,8 @@
 <?php
 
+// Current User
+Route::get('/v1/profile', 'UserController@profile')->middleware('jwt.auth');
+
 // Authentication
 Route::post('/v1/users', 'AuthenticationController@createUser');
 Route::post('/v1/tokens', 'AuthenticationController@createToken');
