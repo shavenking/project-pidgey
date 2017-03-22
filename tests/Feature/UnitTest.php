@@ -11,7 +11,7 @@ class UnitTest extends TestCase
 
     public function testGetList()
     {
-        $response = $this->json('GET', '/api/v1/units')
+        $response = $this->jsonWithToken('GET', '/api/v1/units')
             ->assertStatus(200)
             ->decodeResponseJson();
 

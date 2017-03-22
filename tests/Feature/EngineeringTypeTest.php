@@ -9,7 +9,7 @@ class EngineeringTypeTest extends TestCase
 {
     public function testGetList()
     {
-        $response = $this->json('GET', '/api/v1/engineering-types')
+        $response = $this->jsonWithToken('GET', '/api/v1/engineering-types')
             ->assertStatus(200)
             ->decodeResponseJson();
 

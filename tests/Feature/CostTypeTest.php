@@ -11,7 +11,7 @@ class CostTypeTest extends TestCase
 
     public function testGetList()
     {
-        $response = $this->json('GET', '/api/v1/cost-types')
+        $response = $this->jsonWithToken('GET', '/api/v1/cost-types')
             ->assertStatus(200)
             ->decodeResponseJson();
 

@@ -20,7 +20,7 @@ class WorkItemTest extends TestCase
         $workItems = factory(WorkItem::class)->times(3)->create();
         $work->workItems()->attach($workItems, ['amount' => '0', 'unit_price' => '0']);
 
-        $response = $this->json('GET', "/api/v1/works/{$work->id}/work-items")
+        $response = $this->jsonWithToken('GET', "/api/v1/works/{$work->id}/work-items")
             ->assertStatus(200)
             ->decodeResponseJson();
 
@@ -36,7 +36,7 @@ class WorkItemTest extends TestCase
     {
         $workItem = factory(WorkItem::class)->make();
 
-        $response = $this->json('POST', '/api/v1/work-items', [
+        $response = $this->jsonWithToken('POST', '/api/v1/work-items', [
             'name' => $workItem->name,
             'unit_id' => $workItem->unit_id,
             'cost_type_id' => $workItem->cost_type_id
@@ -70,7 +70,7 @@ class WorkItemTest extends TestCase
             );
         });
 
-        $response = $this->json('GET', '/api/v1/work-items')
+        $response = $this->jsonWithToken('GET', '/api/v1/work-items')
             ->assertStatus(200)
             ->assertExactJson([
                 'data' => $workItems->toArray()
@@ -84,7 +84,7 @@ class WorkItemTest extends TestCase
         $amount = '10.21';
         $unitPrice = '11.01';
 
-        $response = $this->json('POST', "/api/v1/works/{$work->id}/work-items", [
+        $response = $this->jsonWithToken('POST', "/api/v1/works/{$work->id}/work-items", [
             'name' => $workItem->name,
             'unit_id' => $workItem->unit_id,
             'cost_type_id' => $workItem->cost_type_id,
@@ -108,7 +108,7 @@ class WorkItemTest extends TestCase
         $amount = '10.21';
         $unitPrice = '11.01';
 
-        $response = $this->json('POST', "/api/v1/works/{$work->id}/work-items", [
+        $response = $this->jsonWithToken('POST', "/api/v1/works/{$work->id}/work-items", [
             'work_item_id' => $workItem->id,
             'amount' => $amount,
             'unit_price' => $unitPrice
@@ -129,7 +129,7 @@ class WorkItemTest extends TestCase
         $workItem = factory(WorkItem::class)->create();
         $work->workItems()->attach($workItem, ['amount' => '0', 'unit_price' => '0']);
 
-        $this->json('DELETE', "/api/v1/works/{$work->id}/work-items/{$workItem->id}")
+        $this->jsonWithToken('DELETE', "/api/v1/works/{$work->id}/work-items/{$workItem->id}")
             ->assertStatus(204);
 
         $this->assertDatabaseMissing($work->workItems()->getTable(), [
@@ -168,7 +168,7 @@ class WorkItemTest extends TestCase
             );
         }
 
-        $response = $this->json('GET', "/api/v1/works/{$work->id}/work-items/stats")
+        $response = $this->jsonWithToken('GET', "/api/v1/works/{$work->id}/work-items/stats")
             ->assertStatus(200)
             ->assertExactJson([
                 'data' => [
