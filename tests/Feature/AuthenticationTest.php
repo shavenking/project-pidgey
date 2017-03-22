@@ -22,11 +22,16 @@ class AuthenticationTest extends TestCase
             'password' => 'secret'
         ];
 
+        JWTAuth::shouldReceive('attempt')
+            ->once()
+            ->with(array_only($crendentials, ['email', 'password']))
+            ->andReturn('token');
+
         $response = $this->json('POST', '/api/v1/users', $crendentials)
             ->assertStatus(201)
             ->assertExactJson([
                 'data' => [
-                    'token' => JWTAuth::attempt($crendentials)
+                    'token' => 'token'
                 ]
             ]);
 
@@ -38,11 +43,16 @@ class AuthenticationTest extends TestCase
         $user = factory(User::class)->create();
         $crendentials = ['email' => $user->email, 'password' => 'secret'];
 
+        JWTAuth::shouldReceive('attempt')
+            ->once()
+            ->with($crendentials)
+            ->andReturn('token');
+
         $this->json('POST', '/api/v1/tokens', $crendentials)
             ->assertStatus(201)
             ->assertExactJson([
                 'data' => [
-                    'token' => JWTAuth::attempt($crendentials)
+                    'token' => 'token'
                 ]
             ]);
     }
