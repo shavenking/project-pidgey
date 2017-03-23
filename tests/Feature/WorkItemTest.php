@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\{
+    User,
     CostType,
     Work,
     WorkItem
@@ -79,7 +80,8 @@ class WorkItemTest extends TestCase
 
     public function testAddNewWorkItemToWork()
     {
-        $work = factory(Work::class)->create();
+        $this->user = factory(User::class)->create();
+        $work = factory(Work::class)->create(['user_id' => $this->user->id]);
         $workItem = factory(WorkItem::class)->make();
         $amount = '10.21';
         $unitPrice = '11.01';
@@ -103,7 +105,8 @@ class WorkItemTest extends TestCase
 
     public function testAddExistingWorkItemToWork()
     {
-        $work = factory(Work::class)->create();
+        $this->user = factory(User::class)->create();
+        $work = factory(Work::class)->create(['user_id' => $this->user->id]);
         $workItem = factory(WorkItem::class)->create();
         $amount = '10.21';
         $unitPrice = '11.01';
@@ -125,7 +128,8 @@ class WorkItemTest extends TestCase
 
     public function testDelete()
     {
-        $work = factory(Work::class)->create();
+        $this->user = factory(User::class)->create();
+        $work = factory(Work::class)->create(['user_id' => $this->user->id]);
         $workItem = factory(WorkItem::class)->create();
         $work->workItems()->attach($workItem, ['amount' => '0', 'unit_price' => '0']);
 

@@ -6,6 +6,7 @@ use App\{
     Work,
     WorkItem
 };
+use JWTAuth;
 use Illuminate\Http\Request;
 
 class WorkItemController extends Controller
@@ -71,6 +72,12 @@ class WorkItemController extends Controller
 
     public function create(Request $request, Work $work, WorkItem $workItem)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->id !== $work->user_id) {
+            return response()->json([], 403);
+        }
+
         if ($request->has('work_item_id')) {
             $workItem = $workItem->find($request->work_item_id);
         } else {
@@ -99,6 +106,12 @@ class WorkItemController extends Controller
 
     public function delete(Work $work, WorkItem $workItem)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->id !== $work->user_id) {
+            return response()->json([], 403);
+        }
+
         $work->workItems()->detach($workItem);
 
         return response()->json([], 204);
