@@ -28,4 +28,21 @@ class ProjectTest extends TestCase
                 'data' => $projects->toArray()
             ]);
     }
+
+    public function testCreateProject()
+    {
+        $this->user = factory(User::class)->create();
+        $project = factory(Project::class)->make();
+
+        $response = $this->jsonWithToken('POST', '/api/v1/projects', [
+            'name' => $project->name
+        ])->assertStatus(201);
+
+        $project = $this->user->projects()->whereName($project->name)->first();
+
+        $this->assertNotNull($project, 'Project not exists.');
+        $response->assertExactJson([
+            'data' => $project->toArray()
+        ]);
+    }
 }

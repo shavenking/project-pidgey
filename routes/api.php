@@ -10,6 +10,7 @@ Route::post('/v1/tokens', 'AuthenticationController@createToken');
 // Project
 Route::group(['prefix' => '/v1/projects', 'middleware' => 'jwt.auth'], function () {
     Route::get('/', 'ProjectController@list');
+    Route::post('/', 'ProjectController@create');
 });
 
 Route::group(['middleware' => 'jwt.auth'], function () {

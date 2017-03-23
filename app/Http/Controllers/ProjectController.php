@@ -14,4 +14,15 @@ class ProjectController extends Controller
 
         return response()->json(['data' => $user->projects]);
     }
+
+    public function create(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $project = $user->projects()->create(['name' => $request->name]);
+
+        return response()->json([
+            'data' => $project->toArray()
+        ], 201);
+    }
 }
