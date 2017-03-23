@@ -25,4 +25,17 @@ class ProjectController extends Controller
             'data' => $project->toArray()
         ], 201);
     }
+
+    public function delete(Project $project)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->id !== $project->user_id) {
+            return response()->json([], 403);
+        }
+
+        $project->delete();
+
+        return response()->json([], 204);
+    }
 }

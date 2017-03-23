@@ -45,4 +45,26 @@ class ProjectTest extends TestCase
             'data' => $project->toArray()
         ]);
     }
+
+    public function testDeleteProject()
+    {
+        $this->user = factory(User::class)->create();
+        $project = factory(Project::class)->create(['user_id' => $this->user->id]);
+
+        $this->jsonWithToken('DELETE', "/api/v1/projects/{$project->id}")
+            ->assertStatus(204);
+
+        $this->assertDatabaseMissing($project->getTable(), ['id' => $project->id]);
+    }
+
+    public function testOtherUserCanNotDeleteProject()
+    {
+        $project = factory(Project::class)->create();
+        $this->user = factory(User::class)->create();
+
+        $this->jsonWithToken('DELETE', "/api/v1/projects/{$project->id}")
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas($project->getTable(), ['id' => $project->id]);
+    }
 }
