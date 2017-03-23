@@ -46,20 +46,13 @@ class WorkTest extends TestCase
             'name' => $work->name,
             'amount' => $work->amount,
             'engineering_type_id' => $work->engineering_type_id
-        ])->assertStatus(201)->decodeResponseJson();
+        ])->assertStatus(201);
 
-        $this->assertArrayHasKey('data', $response);
-        $this->assertNotEmpty($response['data']);
-        $this->assertArrayHasKey('id', $response['data']);
-        $this->assertArrayHasKey('name', $response['data']);
-        $this->assertArrayHasKey('amount', $response['data']);
-        $this->assertArrayHasKey('unit_price', $response['data']);
-        $this->assertArrayHasKey('engineering_type_id', $response['data']);
+        $work = Work::whereName($work->name)->with('engineeringType')->first();
 
-        // engineering_type
-        $this->assertArrayHasKey('engineering_type', $response['data']);
-        $this->assertArrayHasKey('main_title', $response['data']['engineering_type']);
-        $this->assertArrayHasKey('detailing_title', $response['data']['engineering_type']);
+        $response->assertExactJson([
+            'data' => $work->toArray()
+        ]);
     }
 
     public function testDelete()

@@ -19,7 +19,7 @@ class WorkController extends Controller
         $work = $work->create([
             'name' => $request->name,
             'amount' => $request->amount,
-            'unit_price' => 0,
+            'unit_price' => "0.00",
             'engineering_type_id' => $request->engineering_type_id
         ])->load('engineeringType');
 
