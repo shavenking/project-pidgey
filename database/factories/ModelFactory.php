@@ -51,3 +51,12 @@ $factory->define(App\WorkItem::class, function (Faker\Generator $faker) {
         }
     ];
 });
+
+$factory->define(App\Project::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->word,
+        'user_id' => function () {
+            return factory(App\User::class)->create()->id;
+        }
+    ];
+});

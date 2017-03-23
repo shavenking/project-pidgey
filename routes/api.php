@@ -7,6 +7,11 @@ Route::get('/v1/profile', 'UserController@profile')->middleware('jwt.auth');
 Route::post('/v1/users', 'AuthenticationController@createUser');
 Route::post('/v1/tokens', 'AuthenticationController@createToken');
 
+// Project
+Route::group(['prefix' => '/v1/projects', 'middleware' => 'jwt.auth'], function () {
+    Route::get('/', 'ProjectController@list');
+});
+
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('/v1/units', 'UnitController@list');
     Route::get('/v1/cost-types', 'CostTypeController@list');

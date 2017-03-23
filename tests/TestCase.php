@@ -12,7 +12,9 @@ abstract class TestCase extends BaseTestCase
 
     public function jsonWithToken($method, $uri, array $data = [], array $headers = [])
     {
-        $user = factory(User::class)->create();
+        $user = isset($this->user) && ($this->user instanceof User)
+            ? $this->user
+            : factory(User::class)->create();
         $token = JWTAuth::fromUser($user);
 
         return parent::json($method, $uri, $data, array_merge($headers, [
