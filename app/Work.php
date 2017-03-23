@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Work extends Model
 {
-    protected $fillable = ['name', 'amount', 'unit_price', 'engineering_type_id'];
+    protected $fillable = ['user_id', 'name', 'amount', 'unit_price', 'engineering_type_id'];
 
     public function workItems()
     {

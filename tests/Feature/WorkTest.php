@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\{
+    User,
     Work,
     WorkItem
 };
@@ -57,7 +58,8 @@ class WorkTest extends TestCase
 
     public function testDelete()
     {
-        $work = factory(Work::class)->create();
+        $this->user = factory(User::class)->create();
+        $work = factory(Work::class)->create(['user_id' => $this->user->id]);
         $workItem = factory(WorkItem::class)->create();
         $work->workItems()->attach($workItem, ['amount' => '1', 'unit_price' => '2']);
 
@@ -74,5 +76,15 @@ class WorkTest extends TestCase
             'work_id' => $work->id,
             'work_item_id' => $workItem->id
         ]);
+    }
+
+    public function testOtherUserCanNotDelete()
+    {
+        $work = factory(Work::class)->create();
+
+        $this->jsonWithToken('DELETE', "/api/v1/works/{$work->id}")
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas($work->getTable(), ['id' => $work->id]);
     }
 }

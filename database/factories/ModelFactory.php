@@ -36,6 +36,9 @@ $factory->define(App\Work::class, function (Faker\Generator $faker) {
         'unit_price' => (string) $faker->randomFloat(2, 0, 20),
         'engineering_type_id' => function () {
             return App\EngineeringType::first()->id;
+        },
+        'user_id' => function () {
+            return factory(App\User::class)->create()->id;
         }
     ];
 });

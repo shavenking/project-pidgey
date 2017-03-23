@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Work;
+use JWTAuth;
 use Illuminate\Http\Request;
 
 class WorkController extends Controller
@@ -14,9 +15,11 @@ class WorkController extends Controller
         ]);
     }
 
-    public function create(Request $request, Work $work)
+    public function create(Request $request)
     {
-        $work = $work->create([
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $work = $user->works()->create([
             'name' => $request->name,
             'amount' => $request->amount,
             'unit_price' => "0.00",
@@ -28,6 +31,12 @@ class WorkController extends Controller
 
     public function delete(Work $work)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->id !== $work->user_id) {
+            return response()->json([], 403);
+        }
+
         $work->workItems()->detach();
         $work->delete();
 
