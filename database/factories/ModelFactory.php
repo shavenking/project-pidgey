@@ -63,3 +63,17 @@ $factory->define(App\Project::class, function (Faker\Generator $faker) {
         }
     ];
 });
+
+$factory->define(App\ProjectWork::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->word,
+        'amount' => number_format($faker->randomFloat(2, 0, 20), 2),
+        'unit_price' => number_format($faker->randomFloat(2, 0, 20), 2),
+        'engineering_type_id' => function () {
+            return App\EngineeringType::first()->id;
+        },
+        'project_id' => function () {
+            return factory(App\Project::class)->create()->id;
+        }
+    ];
+});
