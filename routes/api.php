@@ -21,6 +21,13 @@ Route::group(['prefix' => '/v1/projects/{project}/works', 'middleware' => 'jwt.a
     Route::delete('/{work}', 'ProjectWorkController@delete');
 });
 
+// ProjectWorkItem
+Route::group([
+    'prefix' => '/v1/projects/{project}/works/{work}/work-items', 'middleware' => 'jwt.auth'
+], function () {
+    Route::get('/', 'ProjectWorkItemController@list');
+});
+
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('/v1/units', 'UnitController@list');
     Route::get('/v1/cost-types', 'CostTypeController@list');

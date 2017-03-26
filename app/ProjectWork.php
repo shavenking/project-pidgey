@@ -17,4 +17,9 @@ class ProjectWork extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+    public function workItems()
+    {
+        return $this->belongsToMany(ProjectWorkItem::class)->withPivot('amount', 'unit_price')->withTimestamps();
+    }
 }

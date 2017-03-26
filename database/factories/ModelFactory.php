@@ -77,3 +77,18 @@ $factory->define(App\ProjectWork::class, function (Faker\Generator $faker) {
         }
     ];
 });
+
+$factory->define(App\ProjectWorkItem::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->word,
+        'project_id' => function () {
+            return factory(App\Project::class)->create()->id;
+        },
+        'unit_id' => function () {
+            return App\Unit::first()->id;
+        },
+        'cost_type_id' => function () {
+            return App\CostType::first()->id;
+        }
+    ];
+});
