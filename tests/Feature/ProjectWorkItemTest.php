@@ -190,6 +190,22 @@ class ProjectWorkItemTest extends TestCase
         ]);
     }
 
+    public function testUserCanNotCreateDuplicateProjectWorkItem()
+    {
+        $project = factory(Project::class)->create();
+        $work = factory(ProjectWork::class)->create(['project_id' => $project->id]);
+        $workItem = factory(ProjectWorkItem::class)->create(['project_id' => $project->id]);
+
+        $this->user = $project->user;
+        $this->jsonWithToken('POST', "/api/v1/projects/{$project->id}/works/{$work->id}/work-items", [
+            'unit_id' => $workItem->unit_id,
+            'cost_type_id' => $workItem->cost_type_id,
+            'name' => $workItem->name,
+            'amount' => '10.00',
+            'unit_price' => '00.10'
+        ])->assertStatus(409);
+    }
+
     public function testDelete()
     {
         $project = factory(Project::class)->create();

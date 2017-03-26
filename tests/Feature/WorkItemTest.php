@@ -59,6 +59,21 @@ class WorkItemTest extends TestCase
         ]);
     }
 
+    public function testUserCanNotCreateDuplicateWorkItem()
+    {
+        $this->user = factory(User::class)->create();
+        $work = factory(Work::class)->create(['user_id' => $this->user->id]);
+        $workItem = factory(WorkItem::class)->create();
+
+        $this->jsonWithToken('POST', "/api/v1/works/{$work->id}/work-items", [
+            'name' => $workItem->name,
+            'unit_id' => $workItem->unit_id,
+            'cost_type_id' => $workItem->cost_type_id,
+            'amount' => '10.00',
+            'unit_price' => '0.10'
+        ])->assertStatus(409);
+    }
+
     public function testGetListWithoutWork()
     {
         $workItems = factory(WorkItem::class, 2)->create()->map(function (WorkItem $workItem) {

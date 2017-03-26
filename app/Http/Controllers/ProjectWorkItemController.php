@@ -87,12 +87,18 @@ class ProjectWorkItemController extends Controller
 
             $workItem = $work->workItems()->with('unit', 'costType')->find($workItem->id);
         } else if ($request->has('unit_id', 'cost_type_id', 'name')) {
-            $workItem = $work->workItems()->create([
+            $attrs = [
                 'project_id' => $project->id,
                 'unit_id' => $request->unit_id,
                 'cost_type_id' => $request->cost_type_id,
                 'name' => $request->name
-            ], ['amount' => $request->amount, 'unit_price' => $request->unit_price]);
+            ];
+
+            if (ProjectWorkItem::where($attrs)->exists()) { return response()->json([], 409); }
+
+            $workItem = $work->workItems()->create($attrs, [
+                'amount' => $request->amount, 'unit_price' => $request->unit_price
+            ]);
 
             $workItem = $work->workItems()->with('unit', 'costType')->find($workItem->id);
         }

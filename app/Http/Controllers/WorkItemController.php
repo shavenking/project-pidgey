@@ -81,11 +81,14 @@ class WorkItemController extends Controller
         if ($request->has('work_item_id')) {
             $workItem = $workItem->find($request->work_item_id);
         } else {
-            $workItem = $workItem->newInstance([
+            $attrs = [
                 'name' => $request->name,
                 'unit_id' => $request->unit_id,
                 'cost_type_id' => $request->cost_type_id
-            ]);
+            ];
+
+            if ($workItem->query()->where($attrs)->exists()) { return response()->json([], 409); }
+            $workItem = $workItem->newInstance($attrs);
         }
 
         \DB::beginTransaction();
