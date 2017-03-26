@@ -140,7 +140,8 @@ class ProjectWorkTest extends TestCase
 
         $response->assertStatus(201)->assertExactJson(compact('data'));
 
-        // 需檢查全新的專案工項沒有任何專案工料
+        // ProjectWorkItem should be empty for the whole new ProjectWorkItem
+        $this->assertSame(0, $work->workItems->count());
     }
 
     public function testDelete()
