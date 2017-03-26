@@ -112,7 +112,21 @@ class WorkItemController extends Controller
             return response()->json([], 403);
         }
 
+        $workItem = $work->workItems()->find($workItem->id);
+
+        \DB::beginTransaction();
+
+        $work->update([
+            'unit_price' => bcsub(
+                $work->unit_price,
+                bcmul($workItem->pivot->unit_price, $workItem->pivot->amount, 2),
+                2
+            )
+        ]);
+
         $work->workItems()->detach($workItem);
+
+        \DB::commit();
 
         return response()->json([], 204);
     }

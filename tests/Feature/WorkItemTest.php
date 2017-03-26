@@ -129,9 +129,9 @@ class WorkItemTest extends TestCase
     public function testDelete()
     {
         $this->user = factory(User::class)->create();
-        $work = factory(Work::class)->create(['user_id' => $this->user->id]);
+        $work = factory(Work::class)->create(['user_id' => $this->user->id, 'unit_price' => '1.00']);
         $workItem = factory(WorkItem::class)->create();
-        $work->workItems()->attach($workItem, ['amount' => '0', 'unit_price' => '0']);
+        $work->workItems()->attach($workItem, ['amount' => '10.00', 'unit_price' => '00.10']);
 
         $this->jsonWithToken('DELETE', "/api/v1/works/{$work->id}/work-items/{$workItem->id}")
             ->assertStatus(204);
@@ -140,6 +140,8 @@ class WorkItemTest extends TestCase
             'work_id' => $work->id,
             'work_item_id' => $workItem->id
         ]);
+
+        $this->assertDatabaseHas($work->getTable(), ['id' => $work->id, 'unit_price' => '0.00']);
     }
 
     public function testGetStatsByCostType()
