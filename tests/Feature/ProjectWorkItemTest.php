@@ -5,7 +5,8 @@ namespace Tests\Feature;
 use App\{
     Project,
     ProjectWork,
-    ProjectWorkItem
+    ProjectWorkItem,
+    WorkItem
 };
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -74,5 +75,118 @@ class ProjectWorkItemTest extends TestCase
                     ]);
                 })->toArray()
             ]);
+    }
+
+    /**
+     * 使用者可以選擇既有的「專案工料」，新增至指定的專案工項
+     */
+    public function testUserCanAddExistingProjectWorkItemToProjectWork()
+    {
+        $project = factory(Project::class)->create();
+        $workItem = factory(ProjectWorkItem::class)->create(['project_id' => $project->id]);
+        $work = factory(ProjectWork::class)->create(['project_id' => $project->id]);
+
+        $this->user = $project->user;
+        $response = $this->jsonWithToken('POST', "/api/v1/projects/{$project->id}/works/{$work->id}/work-items", [
+            'project_work_item_id' => $workItem->id,
+            'amount' => '10.00',
+            'unit_price' => '00.10'
+        ]);
+
+        $workItem = $work->workItems()->find($workItem->id);
+
+        $response->assertStatus(201)->assertExactJson([
+            'data' => array_merge(
+                array_only($workItem->toArray(), [
+                    'id', 'project_work_item_id', 'unit_id', 'cost_type_id', 'name'
+                ]), [
+                    'amount' => $workItem->pivot->amount,
+                    'unit_price' => $workItem->pivot->unit_price,
+                    'unit_name' => $workItem->unit->name,
+                    'cost_type_name' => $workItem->costType->name
+                ]
+            )
+        ]);
+
+        $this->assertDatabaseHas($work->getTable(), [
+            'id' => $work->id,
+            'unit_price' => bcadd($work->unit_price, '1.00', 2)
+        ]);
+    }
+
+    /**
+     * 使用者可以選擇既有的「標準工料」，新增至指定的工作項目
+     */
+    public function testUserCanAddExistingWorkItemToProjectWork()
+    {
+        $project = factory(Project::class)->create();
+        $work = factory(ProjectWork::class)->create(['project_id' => $project->id]);
+        $workItem = factory(WorkItem::class)->create();
+
+        $this->user = $project->user;
+        $response = $this->jsonWithToken('POST', "/api/v1/projects/{$project->id}/works/{$work->id}/work-items", [
+            'work_item_id' => $workItem->id,
+            'amount' => '10.00',
+            'unit_price' => '00.10'
+        ]);
+
+        $workItem = $work->workItems()->whereName($workItem->name)->first();
+
+        $response->assertStatus(201)->assertExactJson([
+            'data' => array_merge(
+                array_only($workItem->toArray(), [
+                    'id', 'project_work_item_id', 'unit_id', 'cost_type_id', 'name'
+                ]), [
+                    'amount' => $workItem->pivot->amount,
+                    'unit_price' => $workItem->pivot->unit_price,
+                    'unit_name' => $workItem->unit->name,
+                    'cost_type_name' => $workItem->costType->name
+                ]
+            )
+        ]);
+
+        $this->assertDatabaseHas($work->getTable(), [
+            'id' => $work->id,
+            'unit_price' => bcadd($work->unit_price, '1.00', 2)
+        ]);
+    }
+
+    /**
+     * 使用者可以新增全新的專案工料至指定的專案工項
+     */
+    public function testUserCanCreateProjectWorkItemToProjectWork()
+    {
+        $project = factory(Project::class)->create();
+        $work = factory(ProjectWork::class)->create(['project_id' => $project->id]);
+        $workItem = factory(ProjectWorkItem::class)->make();
+
+        $this->user = $project->user;
+        $response = $this->jsonWithToken('POST', "/api/v1/projects/{$project->id}/works/{$work->id}/work-items", [
+            'unit_id' => $workItem->unit_id,
+            'cost_type_id' => $workItem->cost_type_id,
+            'name' => $workItem->name,
+            'amount' => '10.00',
+            'unit_price' => '00.10'
+        ]);
+
+        $workItem = $work->workItems()->whereName($workItem->name)->first();
+
+        $response->assertStatus(201)->assertExactJson([
+            'data' => array_merge(
+                array_only($workItem->toArray(), [
+                    'id', 'project_work_item_id', 'unit_id', 'cost_type_id', 'name'
+                ]), [
+                    'amount' => $workItem->pivot->amount,
+                    'unit_price' => $workItem->pivot->unit_price,
+                    'unit_name' => $workItem->unit->name,
+                    'cost_type_name' => $workItem->costType->name
+                ]
+            )
+        ]);
+
+        $this->assertDatabaseHas($work->getTable(), [
+            'id' => $work->id,
+            'unit_price' => bcadd($work->unit_price, '1.00', 2)
+        ]);
     }
 }
