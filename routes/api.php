@@ -27,6 +27,7 @@ Route::group([
 ], function () {
     Route::get('/', 'ProjectWorkItemController@list');
     Route::post('/', 'ProjectWorkItemController@create');
+    Route::delete('/{workItem}', 'ProjectWorkItemController@delete');
 });
 
 // ProjectWorkItem without WorkItem

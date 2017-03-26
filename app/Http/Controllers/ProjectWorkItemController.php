@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\{
     Project,
     ProjectWork,
+    ProjectWorkItem,
     WorkItem
 };
 use JWTAuth;
@@ -118,5 +119,40 @@ class ProjectWorkItemController extends Controller
         );
 
         return response()->json(compact('data'), 201);
+    }
+
+    public function delete(Project $project, ProjectWork $work, ProjectWorkItem $workItem)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->id !== $project->user_id) { return response()->json([], 403); }
+        if (
+            $project->id !== $work->project_id
+            || $project->id !== $workItem->project_id
+        ) {
+            return response()->json([], 400);
+        }
+
+        $workItem = $work->workItems()->find($workItem->id);
+
+        if (is_null($workItem)) {
+            return response()->json([], 204);
+        }
+
+        \DB::beginTransaction();
+
+        $work->update([
+            'unit_price' => bcsub(
+                $work->unit_price,
+                bcmul($workItem->pivot->amount, $workItem->pivot->unit_price, 2),
+                2
+            )
+        ]);
+
+        $work->workItems()->detach($workItem);
+
+        \DB::commit();
+
+        return response()->json([], 204);
     }
 }

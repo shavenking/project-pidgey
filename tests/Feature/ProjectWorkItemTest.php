@@ -189,4 +189,23 @@ class ProjectWorkItemTest extends TestCase
             'unit_price' => bcadd($work->unit_price, '1.00', 2)
         ]);
     }
+
+    public function testDelete()
+    {
+        $project = factory(Project::class)->create();
+        $work = factory(ProjectWork::class)->create(['project_id' => $project->id, 'unit_price' => '1.00']);
+        $workItem = factory(ProjectWorkItem::class)->create(['project_id' => $project->id]);
+
+        $work->workItems()->attach($workItem, ['amount' => '10.00', 'unit_price' => '0.10']);
+
+        $this->user = $project->user;
+        $this->jsonWithToken('DELETE', "/api/v1/projects/{$project->id}/works/{$work->id}/work-items/{$workItem->id}")
+            ->assertStatus(204);
+
+        $this->assertDatabaseMissing($work->workItems()->getTable(), [
+            'project_work_id' => $work->id,
+            'project_work_item_id' => $workItem->id
+        ]);
+        $this->assertDatabaseHas($work->getTable(), ['id' => $work->id, 'unit_price' => '0.00']);
+    }
 }
