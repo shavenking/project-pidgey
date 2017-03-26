@@ -6,7 +6,9 @@ use App\{
     User,
     Project,
     ProjectWork,
-    Work
+    ProjectWorkItem,
+    Work,
+    WorkItem
 };
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -55,6 +57,8 @@ class ProjectWorkTest extends TestCase
     public function testCreateWithWorkId()
     {
         $stdWork = factory(Work::class)->create();
+        $stdWorkItems = factory(WorkItem::class, 2)->create();
+        $stdWork->workItems()->attach($stdWorkItems->pluck('id'), ['amount' => '10.00', 'unit_price' => '0.10']);
         $this->user = factory(User::class)->create();
         $project = factory(Project::class)->create(['user_id' => $this->user->id]);
 
@@ -84,7 +88,20 @@ class ProjectWorkTest extends TestCase
 
         $response->assertStatus(201)->assertExactJson(compact('data'));
 
-        // TODO: 驗證標準工料項目也要加入
+        // WorkItem should also be copied
+        $stdWork->workItems->each(function ($stdWorkItem) use ($work, $stdWork) {
+            $workItem = ProjectWorkItem::where(array_only($stdWorkItem->toArray(), [
+                'unit_id', 'cost_type_id', 'name'
+            ]))->first();
+
+            $this->assertNotNull($workItem);
+            $this->assertDatabaseHas($work->workItems()->getTable(), [
+                'project_work_id' => $work->id,
+                'project_work_item_id' => $workItem->id,
+                'amount' => $stdWorkItem->pivot->amount,
+                'unit_price' => $stdWorkItem->pivot->unit_price
+            ]);
+        });
     }
 
     /**

@@ -59,6 +59,21 @@ class ProjectWorkController extends Controller
             'engineering_type_id' => isset($stdWork) ? $stdWork->engineering_type_id : $request->engineering_type_id
         ]);
 
+        // copy all WorkItem to this ProjectWork
+        if (isset($stdWork)) {
+            $stdWork->workItems->each(function ($stdWorkItem) use ($project, $work) {
+                $work->workItems()->create([
+                    'project_id' => $project->id,
+                    'unit_id' => $stdWorkItem->unit_id,
+                    'cost_type_id' => $stdWorkItem->cost_type_id,
+                    'name' => $stdWorkItem->name
+                ], [
+                    'amount' => $stdWorkItem->pivot->amount,
+                    'unit_price' => $stdWorkItem->pivot->unit_price
+                ]);
+            });
+        }
+
         $data = array_merge(
             array_only($work->toArray(), ['id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id']),
             [
