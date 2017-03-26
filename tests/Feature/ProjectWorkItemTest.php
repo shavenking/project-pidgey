@@ -6,7 +6,8 @@ use App\{
     Project,
     ProjectWork,
     ProjectWorkItem,
-    WorkItem
+    WorkItem,
+    CostType
 };
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -223,5 +224,38 @@ class ProjectWorkItemTest extends TestCase
             'project_work_item_id' => $workItem->id
         ]);
         $this->assertDatabaseHas($work->getTable(), ['id' => $work->id, 'unit_price' => '0.00']);
+    }
+
+    public function testGetStats()
+    {
+        $project = factory(Project::class)->create();
+        $work = factory(ProjectWork::class)->create(['project_id' => $project->id]);
+        $workItems = factory(ProjectWorkItem::class, 2)->create([
+            'project_id' => $project->id,
+            'cost_type_id' => factory(CostType::class)->create()->id
+        ]);
+        $anotherWorkItem = factory(ProjectWorkItem::class)->create(['project_id' => $project->id]);
+
+        $work->workItems()->attach($workItems->merge([$anotherWorkItem]), [
+            'amount' => '10.00', 'unit_price' => '0.10'
+        ]);
+
+        $this->user = $project->user;
+        $this->jsonWithToken('GET', "/api/v1/projects/{$project->id}/works/{$work->id}/work-items/stats")
+            ->assertStatus(200)
+            ->assertExactJson([
+                'data' => [
+                    [
+                        'cost_type_id' => $anotherWorkItem->costType->id,
+                        'cost_type_name' => $anotherWorkItem->costType->name,
+                        'sum' => '1.00'
+                    ],
+                    [
+                        'cost_type_id' => $workItems->first()->costType->id,
+                        'cost_type_name' => $workItems->first()->costType->name,
+                        'sum' => '2.00'
+                    ]
+                ]
+            ]);
     }
 }

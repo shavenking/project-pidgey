@@ -161,4 +161,23 @@ class ProjectWorkItemController extends Controller
 
         return response()->json([], 204);
     }
+
+    public function stats(Project $project, ProjectWork $work)
+    {
+        $workItems = $work->workItems()->with('costType')->get();
+
+        $data = $workItems->groupBy('cost_type_id')->map(function ($workItems) {
+            return [
+                'cost_type_id' => $workItems->first()->costType->id,
+                'cost_type_name' => $workItems->first()->costType->name,
+                'sum' => $workItems->map(function ($workItem) {
+                    return bcmul($workItem->pivot->amount, $workItem->pivot->unit_price, 2);
+                })->reduce(function ($carry, $unitPrice) {
+                    return bcadd($carry, $unitPrice, 2);
+                }, '0.00')
+            ];
+        })->values();
+
+        return response()->json(compact('data'));
+    }
 }
