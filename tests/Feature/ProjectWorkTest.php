@@ -125,4 +125,35 @@ class ProjectWorkTest extends TestCase
 
         // 需檢查全新的專案工項沒有任何專案工料
     }
+
+    public function testDelete()
+    {
+        $work = factory(ProjectWork::class)->create();
+        $projectId = $work->project_id;
+        $this->user = $work->project->user;
+
+        $this->jsonWithToken('DELETE', "/api/v1/projects/{$projectId}/works/{$work->id}")
+            ->assertStatus(204);
+
+        $this->assertDatabaseMissing($work->getTable(), ['id' => $work->id]);
+    }
+
+    public function testCanNotDeleteIfUserIsNotProjectOwner()
+    {
+        $work = factory(ProjectWork::class)->create();
+        $projectId = $work->project_id;
+
+        $this->jsonWithToken('DELETE', "/api/v1/projects/{$projectId}/works/{$work->id}")
+            ->assertStatus(403);
+    }
+
+    public function testCanNotDeleteIfWorkNotBelongsToProject()
+    {
+        $work = factory(ProjectWork::class)->create();
+        $otherProject = factory(Project::class)->create();
+        $this->user = $otherProject->user;
+
+        $this->jsonWithToken('DELETE', "/api/v1/projects/{$otherProject->id}/works/{$work->id}")
+            ->assertStatus(400);
+    }
 }

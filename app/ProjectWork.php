@@ -12,4 +12,9 @@ class ProjectWork extends Model
     {
         return $this->belongsTo(EngineeringType::class);
     }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\{
     Project,
+    ProjectWork,
     Work
 };
 use JWTAuth;
@@ -69,5 +70,22 @@ class ProjectWorkController extends Controller
         // TODO: 標準工料項目也得自動加入
 
         return response()->json(compact('data'), 201);
+    }
+
+    public function delete(Project $project, ProjectWork $work)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($project->user_id !== $user->id) {
+            return response()->json([], 403);
+        }
+
+        if ($project->id !== $work->project_id) {
+            return response()->json([], 400);
+        }
+
+        $work->delete();
+
+        return response()->json([], 204);
     }
 }
