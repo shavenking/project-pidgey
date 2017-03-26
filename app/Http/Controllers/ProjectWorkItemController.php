@@ -34,4 +34,24 @@ class ProjectWorkItemController extends Controller
 
         return response()->json(['data' => $workItems]);
     }
+
+    public function listWithoutWork(Project $project)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->id !== $project->user_id) { return response()->json([], 403); }
+
+        $workItems = $project->workItems()->with('unit', 'costType')->get()->map(function ($workItem) {
+            $base = array_only($workItem->toArray(), [
+                'id', 'project_id', 'unit_id', 'cost_type_id', 'name'
+            ]);
+
+            return array_merge($base, [
+                'unit_name' => $workItem->unit->name,
+                'cost_type_name' => $workItem->costType->name
+            ]);
+        });
+
+        return response()->json(['data' => $workItems]);
+    }
 }

@@ -28,6 +28,11 @@ Route::group([
     Route::get('/', 'ProjectWorkItemController@list');
 });
 
+// ProjectWorkItem without WorkItem
+Route::group(['prefix' => '/v1/projects/{project}/work-items', 'middleware' => 'jwt.auth'], function () {
+    Route::get('/', 'ProjectWorkItemController@listWithoutWork');
+});
+
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('/v1/units', 'UnitController@list');
     Route::get('/v1/cost-types', 'CostTypeController@list');

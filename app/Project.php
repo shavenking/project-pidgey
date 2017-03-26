@@ -13,6 +13,11 @@ class Project extends Model
         return $this->hasMany(ProjectWork::class);
     }
 
+    public function workItems()
+    {
+        return $this->hasMany(ProjectWorkItem::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
