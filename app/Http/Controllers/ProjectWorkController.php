@@ -99,7 +99,12 @@ class ProjectWorkController extends Controller
             return response()->json([], 400);
         }
 
+        \DB::beginTransaction();
+
+        $work->workItems()->detach();
         $work->delete();
+
+        \DB::commit();
 
         return response()->json([], 204);
     }

@@ -146,6 +146,8 @@ class ProjectWorkTest extends TestCase
     public function testDelete()
     {
         $work = factory(ProjectWork::class)->create();
+        $workItems = factory(ProjectWorkItem::class, 2)->create();
+        $work->workItems()->attach($workItems->pluck('id'), ['amount' => '10.00', 'unit_price' => '0.10']);
         $projectId = $work->project_id;
         $this->user = $work->project->user;
 
@@ -153,6 +155,13 @@ class ProjectWorkTest extends TestCase
             ->assertStatus(204);
 
         $this->assertDatabaseMissing($work->getTable(), ['id' => $work->id]);
+        $workItems->each(function ($workItem) use ($work) {
+            $this->assertDatabaseHas($work->workItems()->getRelated()->getTable(), ['id' => $workItem->id]);
+            $this->assertDatabaseMissing($work->workItems()->getTable(), [
+                'project_work_id' => $work->id,
+                'project_work_item_id' => $workItem->id
+            ]);
+        });
     }
 
     public function testCanNotDeleteIfUserIsNotProjectOwner()
