@@ -88,7 +88,7 @@ $factory->define(App\ProjectWorkItem::class, function (Faker\Generator $faker) {
             return App\Unit::first()->id;
         },
         'cost_type_id' => function () {
-            return App\CostType::first()->id;
+            return factory(App\CostType::class)->create()->id;
         }
     ];
 });

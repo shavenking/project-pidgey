@@ -183,4 +183,45 @@ class ProjectWorkTest extends TestCase
         $this->jsonWithToken('DELETE', "/api/v1/projects/{$otherProject->id}/works/{$work->id}")
             ->assertStatus(400);
     }
+
+    public function testGetStats()
+    {
+        $project = factory(Project::class)->create();
+        $workItems = factory(ProjectWorkItem::class, 3)->create();
+        $works = factory(ProjectWork::class, 2)->create(['project_id' => $project->id, 'unit_price' => '0.00']);
+
+        $works[0]->workItems()->attach([
+            $workItems[0]->id, $workItems[1]->id
+        ], ['amount' => '10.00', 'unit_price' => '0.10']);
+
+        $works[1]->workItems()->attach([
+            $workItems[1]->id, $workItems[2]->id
+        ], ['amount' => '10.00', 'unit_price' => '0.10']);
+
+        $this->user = $project->user;
+        $this->jsonWithToken('GET', "/api/v1/projects/{$project->id}/works/stats")
+            ->assertStatus(200)
+            ->assertExactJson([
+                'data' => [
+                    'total' => '4.00',
+                    'costTypes' => [
+                        [
+                            'cost_type_id' => $workItems[0]->costType->id,
+                            'cost_type_name' => $workItems[0]->costType->name,
+                            'sum' => '1.00'
+                        ],
+                        [
+                            'cost_type_id' => $workItems[1]->costType->id,
+                            'cost_type_name' => $workItems[1]->costType->name,
+                            'sum' => '2.00'
+                        ],
+                        [
+                            'cost_type_id' => $workItems[2]->costType->id,
+                            'cost_type_name' => $workItems[2]->costType->name,
+                            'sum' => '1.00'
+                        ]
+                    ]
+                ]
+            ]);
+    }
 }

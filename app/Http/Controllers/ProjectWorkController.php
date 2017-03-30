@@ -35,6 +35,35 @@ class ProjectWorkController extends Controller
         return response()->json(['data' => $works]);
     }
 
+    public function stats(Project $project)
+    {
+        $workItems = $project->works->map(function ($work) {
+            return $work->workItems()->with('costType')->get();
+        })->flatten();
+
+        $costTypes = $workItems->groupBy('cost_type_id')->map(function ($workItems) {
+            $costType = $workItems->first()->costType;
+
+            return [
+                'cost_type_id' => $costType->id,
+                'cost_type_name' => $costType->name,
+                'sum' => $workItems->map(function ($workItem) {
+                    return bcmul($workItem->pivot->amount, $workItem->pivot->unit_price, 2);
+                })->reduce(function ($carry, $unitPrice) {
+                    return bcadd($carry, $unitPrice, 2);
+                }, '0.00')
+            ];
+        })->values();
+
+        $total = $costTypes->pluck('sum')->reduce(function ($carry, $sum) {
+            return bcadd($carry, $sum, 2);
+        }, '0.00');
+
+        return response()->json([
+            'data' => compact('total', 'costTypes')
+        ]);
+    }
+
     public function create(Request $request, Project $project)
     {
         $user = JWTAuth::parseToken()->authenticate();
