@@ -196,7 +196,9 @@ class ProjectWorkTest extends TestCase
     {
         $project = factory(Project::class)->create();
         $workItems = factory(ProjectWorkItem::class, 3)->create();
-        $works = factory(ProjectWork::class, 2)->create(['project_id' => $project->id, 'unit_price' => '0.00']);
+        $works = factory(ProjectWork::class, 2)->create([
+            'project_id' => $project->id, 'unit_price' => '0.00', 'amount' => '7.01'
+        ]);
 
         $works[0]->workItems()->attach([
             $workItems[0]->id, $workItems[1]->id
@@ -211,22 +213,22 @@ class ProjectWorkTest extends TestCase
             ->assertStatus(200)
             ->assertExactJson([
                 'data' => [
-                    'total' => '4.00',
+                    'total' => '28.04',
                     'costTypes' => [
                         [
                             'cost_type_id' => $workItems[0]->costType->id,
                             'cost_type_name' => $workItems[0]->costType->name,
-                            'sum' => '1.00'
+                            'sum' => '7.01'
                         ],
                         [
                             'cost_type_id' => $workItems[1]->costType->id,
                             'cost_type_name' => $workItems[1]->costType->name,
-                            'sum' => '2.00'
+                            'sum' => '14.02'
                         ],
                         [
                             'cost_type_id' => $workItems[2]->costType->id,
                             'cost_type_name' => $workItems[2]->costType->name,
-                            'sum' => '1.00'
+                            'sum' => '7.01'
                         ]
                     ]
                 ]

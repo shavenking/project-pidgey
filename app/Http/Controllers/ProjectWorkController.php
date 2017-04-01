@@ -38,21 +38,25 @@ class ProjectWorkController extends Controller
 
     public function stats(Project $project)
     {
-        $workItems = $project->works->map(function ($work) {
-            return $work->workItems()->with('costType')->get();
-        })->flatten();
+        $costTypes = $project->works()->with('workItems.costType')->get()->map(function ($work) {
+            return $work->workItems->map(function ($workItem) use ($work) {
+                $workItem->pivot->amount = bcmul($work->amount, $workItem->pivot->amount, 2);
 
-        $costTypes = $workItems->groupBy('cost_type_id')->map(function ($workItems) {
+                return $workItem;
+            });
+        })->flatten()->groupBy('cost_type_id')->map(function ($workItems) {
             $costType = $workItems->first()->costType;
+
+            $costTypeSum = $workItems->map(function ($workItem) {
+                return bcmul($workItem->pivot->amount, $workItem->pivot->unit_price, 2);
+            })->reduce(function ($carry, $unitPrice) {
+                return bcadd($carry, $unitPrice, 2);
+            }, '0.00');
 
             return [
                 'cost_type_id' => $costType->id,
                 'cost_type_name' => $costType->name,
-                'sum' => $workItems->map(function ($workItem) {
-                    return bcmul($workItem->pivot->amount, $workItem->pivot->unit_price, 2);
-                })->reduce(function ($carry, $unitPrice) {
-                    return bcadd($carry, $unitPrice, 2);
-                }, '0.00')
+                'sum' => $costTypeSum
             ];
         })->values();
 
