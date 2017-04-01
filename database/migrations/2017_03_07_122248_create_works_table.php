@@ -17,8 +17,8 @@ class CreateWorksTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->string('name', 20);
-            $table->decimal('amount', 10, 2);
             $table->decimal('unit_price', 10, 2);
+            $table->integer('unit_id');
             $table->integer('engineering_type_id');
             $table->timestamps();
         });

@@ -31,10 +31,11 @@ class ProjectWorkTest extends TestCase
             ->assertExactJson([
                 'data' => $works->map(function ($work) {
                     $base = array_only($work->toArray(), [
-                        'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id'
+                        'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id', 'unit_id'
                     ]);
 
                     return array_merge($base, [
+                        'unit_name' => $work->unit->name,
                         'engineering_type_main_title' => $work->engineeringType->main_title,
                         'engineering_type_detailing_title' => $work->engineeringType->detailing_title
                     ]);
@@ -71,16 +72,19 @@ class ProjectWorkTest extends TestCase
             'name' => $stdWork->name,
             'amount' => '10.55',
             'unit_price' => $stdWork->unit_price,
+            'unit_id' => $stdWork->unit->id,
             'engineering_type_id' => $stdWork->engineering_type_id
         ];
 
         $this->assertDatabaseHas($project->works()->getRelated()->getTable(), $attrs);
 
-        $work = $project->works()->where($attrs)->with('engineeringType')->first();
+        $work = $project->works()->where($attrs)->with('engineeringType', 'unit')->first();
 
         $data = array_merge(
-            array_only($work->toArray(), ['id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id']),
-            [
+            array_only($work->toArray(), [
+                'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id', 'unit_id'
+            ]), [
+                'unit_name' => $work->unit->name,
                 'engineering_type_main_title' => $work->engineeringType->main_title,
                 'engineering_type_detailing_title' => $work->engineeringType->detailing_title
             ]
@@ -116,6 +120,7 @@ class ProjectWorkTest extends TestCase
         $response = $this->jsonWithToken('POST', "/api/v1/projects/{$project->id}/works", [
             'name' => $work->name,
             'amount' => $work->amount,
+            'unit_id' => $work->unit_id,
             'engineering_type_id' => $work->engineering_type_id
         ]);
 
@@ -123,16 +128,19 @@ class ProjectWorkTest extends TestCase
             'name' => $work->name,
             'amount' => $work->amount,
             'unit_price' => '0.00',
+            'unit_id' => $work->unit_id,
             'engineering_type_id' => $work->engineering_type_id
         ];
 
         $this->assertDatabaseHas($project->works()->getRelated()->getTable(), $attrs);
 
-        $work = $project->works()->where($attrs)->with('engineeringType')->first();
+        $work = $project->works()->where($attrs)->with('engineeringType', 'unit')->first();
 
         $data = array_merge(
-            array_only($work->toArray(), ['id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id']),
-            [
+            array_only($work->toArray(), [
+                'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id', 'unit_id'
+            ]), [
+                'unit_name' => $work->unit->name,
                 'engineering_type_main_title' => $work->engineeringType->main_title,
                 'engineering_type_detailing_title' => $work->engineeringType->detailing_title
             ]

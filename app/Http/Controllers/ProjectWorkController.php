@@ -21,12 +21,13 @@ class ProjectWorkController extends Controller
             return response()->json([], 403);
         }
 
-        $works = $project->works()->with('engineeringType')->get()->map(function ($work) {
+        $works = $project->works()->with('engineeringType', 'unit')->get()->map(function ($work) {
             $base = array_only($work->toArray(), [
-                'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id'
+                'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id', 'unit_id'
             ]);
 
             return array_merge($base, [
+                'unit_name' => $work->unit->name,
                 'engineering_type_main_title' => $work->engineeringType->main_title,
                 'engineering_type_detailing_title' => $work->engineeringType->detailing_title
             ]);
@@ -85,6 +86,7 @@ class ProjectWorkController extends Controller
             'name' => isset($stdWork) ? $stdWork->name : $request->name,
             'amount' => $request->amount,
             'unit_price' => isset($stdWork) ? $stdWork->unit_price : '0.00',
+            'unit_id' => isset($stdWork) ? $stdWork->unit_id : $request->unit_id,
             'engineering_type_id' => isset($stdWork) ? $stdWork->engineering_type_id : $request->engineering_type_id
         ]);
 
@@ -104,8 +106,10 @@ class ProjectWorkController extends Controller
         }
 
         $data = array_merge(
-            array_only($work->toArray(), ['id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id']),
-            [
+            array_only($work->toArray(), [
+                'id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'project_id', 'unit_id'
+            ]), [
+                'unit_name' => $work->unit->name,
                 'engineering_type_main_title' => $work->engineeringType->main_title,
                 'engineering_type_detailing_title' => $work->engineeringType->detailing_title
             ]

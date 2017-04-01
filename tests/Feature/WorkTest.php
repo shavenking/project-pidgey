@@ -28,9 +28,12 @@ class WorkTest extends TestCase
         foreach ($response['data'] as $work) {
             $this->assertArrayHasKey('id', $work);
             $this->assertArrayHasKey('name', $work);
-            $this->assertArrayHasKey('amount', $work);
+            $this->assertArrayHasKey('unit_id', $work);
             $this->assertArrayHasKey('unit_price', $work);
             $this->assertArrayHasKey('engineering_type_id', $work);
+
+            $this->assertArrayHasKey('unit', $work);
+            $this->assertArrayHasKey('name', $work['unit']);
 
             // engineering_type
             $this->assertArrayHasKey('engineering_type', $work);
@@ -45,11 +48,11 @@ class WorkTest extends TestCase
 
         $response = $this->jsonWithToken('POST', '/api/v1/works', [
             'name' => $work->name,
-            'amount' => $work->amount,
+            'unit_id' => $work->unit_id,
             'engineering_type_id' => $work->engineering_type_id
         ])->assertStatus(201);
 
-        $work = Work::whereName($work->name)->with('engineeringType')->first();
+        $work = Work::whereName($work->name)->with('engineeringType', 'unit')->first();
 
         $response->assertExactJson([
             'data' => $work->toArray()

@@ -11,7 +11,7 @@ class WorkController extends Controller
     public function list(Work $work)
     {
         return response()->json([
-            'data' => $work->with('engineeringType')->get()
+            'data' => $work->with('engineeringType', 'unit')->get()
         ]);
     }
 
@@ -21,10 +21,10 @@ class WorkController extends Controller
 
         $work = $user->works()->create([
             'name' => $request->name,
-            'amount' => $request->amount,
+            'unit_id' => $request->unit_id,
             'unit_price' => "0.00",
             'engineering_type_id' => $request->engineering_type_id
-        ])->load('engineeringType');
+        ])->load('engineeringType', 'unit');
 
         return response()->json(['data' => $work], 201);
     }

@@ -18,6 +18,7 @@ class CreateProjectWorksTable extends Migration
             $table->string('name', 20);
             $table->decimal('amount', 10, 2);
             $table->decimal('unit_price', 10, 2);
+            $table->integer('unit_id');
             $table->integer('engineering_type_id');
             $table->integer('project_id');
             $table->timestamps();

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectWork extends Model
 {
-    protected $fillable = ['name', 'amount', 'unit_price', 'engineering_type_id', 'project_id'];
+    protected $fillable = ['name', 'amount', 'unit_price', 'engineering_type_id', 'project_id', 'unit_id'];
 
     public function engineeringType()
     {
@@ -21,5 +21,10 @@ class ProjectWork extends Model
     public function workItems()
     {
         return $this->belongsToMany(ProjectWorkItem::class)->withPivot('amount', 'unit_price')->withTimestamps();
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

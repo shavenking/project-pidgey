@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Work extends Model
 {
-    protected $fillable = ['user_id', 'name', 'amount', 'unit_price', 'engineering_type_id'];
+    protected $fillable = ['user_id', 'name', 'amount', 'unit_price', 'engineering_type_id', 'unit_id'];
 
     public function workItems()
     {
@@ -16,5 +16,10 @@ class Work extends Model
     public function engineeringType()
     {
         return $this->belongsTo(EngineeringType::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

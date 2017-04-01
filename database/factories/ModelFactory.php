@@ -32,8 +32,10 @@ $factory->define(App\CostType::class, function (Faker\Generator $faker) {
 $factory->define(App\Work::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->word,
-        'amount' => (string) $faker->randomFloat(2, 0, 20),
         'unit_price' => (string) $faker->randomFloat(2, 0, 20),
+        'unit_id' => function () {
+            return App\Unit::first()->id;
+        },
         'engineering_type_id' => function () {
             return App\EngineeringType::first()->id;
         },
@@ -69,6 +71,9 @@ $factory->define(App\ProjectWork::class, function (Faker\Generator $faker) {
         'name' => $faker->word,
         'amount' => number_format($faker->randomFloat(2, 0, 20), 2),
         'unit_price' => number_format($faker->randomFloat(2, 0, 20), 2),
+        'unit_id' => function () {
+            return App\Unit::first()->id;
+        },
         'engineering_type_id' => function () {
             return App\EngineeringType::first()->id;
         },
